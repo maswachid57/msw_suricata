@@ -72,32 +72,32 @@ LS_HOME/bin/logstash-plugin update logstash-filter-dns
 
 ### 3. Copy the pipeline files to the Logstash configuration path.
 
-There are four sets of configuration files provided within the `logstash/synlite_suricata` folder:
+There are four sets of configuration files provided within the `logstash/msw_suricata` folder:
 
 ```text
 logstash
-  `- synlite_suricata
+  `- msw_suricata
        |- conf.d  (contains the logstash pipeline)
        |- dictionaries (yaml files used to enrich the raw log data)
        |- geoipdbs  (contains GeoIP databases)
        `- templates  (contains index templates)
 ```
 
-Copy the `synlite_suricata` directory to the location of your Logstash configuration files (e.g. on RedHat/CentOS or Ubuntu this would be `/etc/logstash/synlite_suricata` ). If you place the pipeline within a different path, you will need to modify the following environment variables to specify the correct location:
+Copy the `msw_suricata` directory to the location of your Logstash configuration files (e.g. on RedHat/CentOS or Ubuntu this would be `/etc/logstash/msw_suricata` ). If you place the pipeline within a different path, you will need to modify the following environment variables to specify the correct location:
 
 Environment Variable | Description | Default Value
 --- | --- | ---
-SYNLITE_SURICATA_DICT_PATH | The path where the dictionary files are located | /etc/logstash/synlite_suricata/dictionaries
-SYNLITE_SURICATA_TEMPLATE_PATH | The path to where index templates are located | /etc/logstash/synlite_suricata/templates
-SYNLITE_SURICATA_GEOIP_DB_PATH | The path where the GeoIP DBs are located | /etc/logstash/synlite_suricata/geoipdbs
+MSW_SURICATA_DICT_PATH | The path where the dictionary files are located | /etc/logstash/msw_suricata/dictionaries
+MSW_SURICATA_TEMPLATE_PATH | The path to where index templates are located | /etc/logstash/msw_suricata/templates
+MSW_SURICATA_GEOIP_DB_PATH | The path where the GeoIP DBs are located | /etc/logstash/msw_suricata/geoipdbs
 
 ### 4. Setup environment variable helper files
 
 Rather than directly editing the pipeline configuration files for your environment, environment variables are used to provide a single location for most configuration options. These environment variables will be referred to in the remaining instructions. A [reference](#environment-variable-reference) of all environment variables can be found [here](#environment-variable-reference).
 
-Depending on your environment there may be many ways to define environment variables. The files `profile.d/synlite_suricata.sh` and `logstash.service.d/synlite_suricata.conf` are provided to help you with this setup.
+Depending on your environment there may be many ways to define environment variables. The files `profile.d/msw_suricata.sh` and `logstash.service.d/msw_suricata.conf` are provided to help you with this setup.
 
-Recent versions of both RedHat/CentOS and Ubuntu use systemd to start background processes. When deploying sýnesis&trade; Lite for Suricata on a host where Logstash will be managed by systemd, copy `logstash.service.d/synlite_suricata.conf` to `/etc/systemd/system/logstash.service.d/synlite_suricata.conf`. Any configuration changes can then be made by editing this file.
+Recent versions of both RedHat/CentOS and Ubuntu use systemd to start background processes. When deploying sýnesis&trade; Lite for Suricata on a host where Logstash will be managed by systemd, copy `logstash.service.d/msw_suricata.conf` to `/etc/systemd/system/logstash.service.d/msw_suricata.conf`. Any configuration changes can then be made by editing this file.
 
 > Remember that for your changes to take effect, you must issue the command `sudo systemctl daemon-reload`.
 
@@ -108,8 +108,8 @@ Logstash 6.0 introduced the ability to run multiple pipelines from a single Logs
 Edit `pipelines.yml` (usually located at `/etc/logstash/pipelines.yml`) and add the sýnesis&trade; Lite for Suricata pipeline (adjust the path as necessary).
 
 ```text
-- pipeline.id: synlite_suricata
-  path.config: "/etc/logstash/synlite_suricata/conf.d/*.conf"
+- pipeline.id: msw_suricata
+  path.config: "/etc/logstash/msw_suricata/conf.d/*.conf"
 ```
 
 ### 6. Configure inputs
@@ -118,8 +118,8 @@ By default Filebeat data will be recieved on all IPv4 addresses of the Logstash 
 
 Environment Variable | Description | Default Value
 --- | --- | ---
-SYNLITE_SURICATA_BEATS_HOST | The IP address on which to listen for Filebeat messages | 0.0.0.0
-SYNLITE_SURICATA_BEATS_PORT | The TCP port on which to listen for Filebeat messages | 5044
+MSW_SURICATA_BEATS_HOST | The IP address on which to listen for Filebeat messages | 0.0.0.0
+MSW_SURICATA_BEATS_PORT | The TCP port on which to listen for Filebeat messages | 5044
 
 ### 7. Configure Elasticsearch output
 
@@ -127,9 +127,9 @@ Obviously the data needs to land in Elasticsearch, so you need to tell Logstash 
 
 Environment Variable | Description | Default Value
 --- | --- | ---
-SYNLITE_SURICATA_ES_HOST | The Elasticsearch host to which the output will send data | 127.0.0.1:9200
-SYNLITE_SURICATA_ES_USER | The password for the connection to Elasticsearch | elastic
-SYNLITE_SURICATA_ES_PASSWD | The username for the connection to Elasticsearch | changeme
+MSW_SURICATA_ES_HOST | The Elasticsearch host to which the output will send data | 127.0.0.1:9200
+MSW_SURICATA_ES_USER | The password for the connection to Elasticsearch | elastic
+MSW_SURICATA_ES_PASSWD | The username for the connection to Elasticsearch | changeme
 
 > If you are only using the open-source version of Elasticsearch, it will ignore the username and password. In that case just leave the defaults.
 
@@ -147,12 +147,12 @@ The DNS lookup features of sýnesis&trade; Lite for Suricata can be configured u
 
 Environment Variable | Description | Default Value
 --- | --- | ---
-SYNLITE_SURICATA_RESOLVE_IP2HOST | Enable/Disable DNS requests | false
-SYNLITE_SURICATA_NAMESERVER | The DNS server to which the dns filter should send requests | 127.0.0.1
-SYNLITE_SURICATA_DNS_HIT_CACHE_SIZE | The cache size for successful DNS queries | 25000
-SYNLITE_SURICATA_DNS_HIT_CACHE_TTL | The time in seconds successful DNS queries are cached | 900
-SYNLITE_SURICATA_DNS_FAILED_CACHE_SIZE | The cache size for failed DNS queries | 75000
-SYNLITE_SURICATA_DNS_FAILED_CACHE_TTL | The time in seconds failed DNS queries are cached | 3600
+MSW_SURICATA_RESOLVE_IP2HOST | Enable/Disable DNS requests | false
+MSW_SURICATA_NAMESERVER | The DNS server to which the dns filter should send requests | 127.0.0.1
+MSW_SURICATA_DNS_HIT_CACHE_SIZE | The cache size for successful DNS queries | 25000
+MSW_SURICATA_DNS_HIT_CACHE_TTL | The time in seconds successful DNS queries are cached | 900
+MSW_SURICATA_DNS_FAILED_CACHE_SIZE | The cache size for failed DNS queries | 75000
+MSW_SURICATA_DNS_FAILED_CACHE_TTL | The time in seconds failed DNS queries are cached | 3600
 
 ### 9. Start Logstash
 
@@ -175,7 +175,7 @@ Logstash setup is now complete. If you are receiving data from Filebeat, you sho
 
 ## Setting up Kibana
 
-The vizualizations and dashboards can be loaded into Kibana by importing the `synlite_suricata.kibana.7.1.x.json` file from within the Kibana UI. This is done in the Kibana `Management` app under `Saved Objects`.
+The vizualizations and dashboards can be loaded into Kibana by importing the `msw_suricata.kibana.7.1.x.json` file from within the Kibana UI. This is done in the Kibana `Management` app under `Saved Objects`.
 
 ### Recommended Kibana Advanced Settings
 
@@ -304,24 +304,24 @@ The supported environment variables are:
 
 Environment Variable | Description | Default Value
 --- | --- | ---
-SYNLITE_SURICATA_DICT_PATH | The path where the dictionary files are located | /etc/logstash/synlite_suricata/dictionaries
-SYNLITE_SURICATA_TEMPLATE_PATH | The path to where index templates are located | /etc/logstash/synlite_suricata/templates
-SYNLITE_SURICATA_GEOIP_DB_PATH | The path where the GeoIP DBs are located | /etc/logstash/synlite_suricata/geoipdbs
-SYNLITE_SURICATA_GEOIP_CACHE_SIZE | The size of the GeoIP query cache | 8192
-SYNLITE_SURICATA_GEOIP_LOOKUP | Enable/Disable GeoIP lookups | true
-SYNLITE_SURICATA_ASN_LOOKUP | Enable/Disable ASN lookups | true
-SYNLITE_SURICATA_CLEANUP_SIGS | Enable this option to remove unneeded text from alert signatures. | false
-SYNLITE_SURICATA_RESOLVE_IP2HOST | Enable/Disable DNS requests | false
-SYNLITE_SURICATA_NAMESERVER | The DNS server to which the dns filter should send requests | 127.0.0.1
-SYNLITE_SURICATA_DNS_HIT_CACHE_SIZE | The cache size for successful DNS queries | 25000
-SYNLITE_SURICATA_DNS_HIT_CACHE_TTL | The time in seconds successful DNS queries are cached | 900
-SYNLITE_SURICATA_DNS_FAILED_CACHE_SIZE | The cache size for failed DNS queries | 75000
-SYNLITE_SURICATA_DNS_FAILED_CACHE_TTL | The time in seconds failed DNS queries are cached | 3600
-SYNLITE_SURICATA_ES_HOST | The Elasticsearch host to which the output will send data | 127.0.0.1:9200
-SYNLITE_SURICATA_ES_USER | The password for the connection to Elasticsearch | elastic
-SYNLITE_SURICATA_ES_PASSWD | The username for the connection to Elasticsearch | changeme
-SYNLITE_SURICATA_BEATS_HOST | The IP address on which to listen for Filebeat messages | 0.0.0.0
-SYNLITE_SURICATA_BEATS_PORT | The TCP port on which to listen for Filebeat messages | 5044
+MSW_SURICATA_DICT_PATH | The path where the dictionary files are located | /etc/logstash/msw_suricata/dictionaries
+MSW_SURICATA_TEMPLATE_PATH | The path to where index templates are located | /etc/logstash/msw_suricata/templates
+MSW_SURICATA_GEOIP_DB_PATH | The path where the GeoIP DBs are located | /etc/logstash/msw_suricata/geoipdbs
+MSW_SURICATA_GEOIP_CACHE_SIZE | The size of the GeoIP query cache | 8192
+MSW_SURICATA_GEOIP_LOOKUP | Enable/Disable GeoIP lookups | true
+MSW_SURICATA_ASN_LOOKUP | Enable/Disable ASN lookups | true
+MSW_SURICATA_CLEANUP_SIGS | Enable this option to remove unneeded text from alert signatures. | false
+MSW_SURICATA_RESOLVE_IP2HOST | Enable/Disable DNS requests | false
+MSW_SURICATA_NAMESERVER | The DNS server to which the dns filter should send requests | 127.0.0.1
+MSW_SURICATA_DNS_HIT_CACHE_SIZE | The cache size for successful DNS queries | 25000
+MSW_SURICATA_DNS_HIT_CACHE_TTL | The time in seconds successful DNS queries are cached | 900
+MSW_SURICATA_DNS_FAILED_CACHE_SIZE | The cache size for failed DNS queries | 75000
+MSW_SURICATA_DNS_FAILED_CACHE_TTL | The time in seconds failed DNS queries are cached | 3600
+MSW_SURICATA_ES_HOST | The Elasticsearch host to which the output will send data | 127.0.0.1:9200
+MSW_SURICATA_ES_USER | The password for the connection to Elasticsearch | elastic
+MSW_SURICATA_ES_PASSWD | The username for the connection to Elasticsearch | changeme
+MSW_SURICATA_BEATS_HOST | The IP address on which to listen for Filebeat messages | 0.0.0.0
+MSW_SURICATA_BEATS_PORT | The TCP port on which to listen for Filebeat messages | 5044
 
 # Recommended Setting for timepicker:quickRanges
 
